@@ -1,5 +1,4 @@
-from flask import Flask, jsonify, request
-from flask_cors import CORS
+from flask import Flask, jsonify, request, send_from_directory
 import csv, os, requests
 from datetime import date
 from dotenv import load_dotenv
@@ -234,10 +233,11 @@ def movies():
 
 @app.route('/')
 def home():
-    return jsonify({
-        'status': 'CineLyze running!',
-        'routes': ['/analyze', '/add_review', '/stats', '/movies']
-    })
+    return send_from_directory('../frontend', 'index.html')
+
+@app.route('/<path:filename>')
+def static_files(filename):
+    return send_from_directory('../frontend', filename)
 
 # ─── Run ────────────────────────────────────────────────────────
 

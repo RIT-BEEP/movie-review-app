@@ -24,7 +24,7 @@ async function addReview() {
 
   try {
     // Step 1: Save review
-    const res = await fetch('http://127.0.0.1:5000/add_review', {
+    const res = await fetch('/add_review', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ movie, review, rating })
@@ -79,7 +79,7 @@ async function analyzeMovie(movie) {
   document.getElementById('movieInput').value = movie;
 
   try {
-    const res = await fetch('http://127.0.0.1:5000/analyze', {
+    const res = await fetch('/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ movie })
