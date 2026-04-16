@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CineLyze — Movie Review Analyzer</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── HEADER ── -->
+  <header class="cinema-header">
+    <div class="header-bar"></div>
+    <h1 class="title">CINELYZE</h1>
+    <p class="subtitle">Movie Review Analyzer</p>
+  </header>
+
+  <!-- ── PROBLEM STATEMENT BANNER ── -->
+  <div class="problem-banner">
+    <div class="prob-icon">🎬</div>
+    <div class="prob-content">
+      <div class="prob-title">The Problem</div>
+      <div class="prob-points">
+        <span class="prob-tag">📚 Reviews are too many</span>
+        <span class="prob-tag">⏱ Time-consuming to read</span>
+        <span class="prob-tag">😕 Confusing to understand</span>
+      </div>
+      <div class="prob-solution">
+        ✅ <strong>Our Solution:</strong> Write one review → Get instant sentiment, rating & recommendation
+      </div>
+    </div>
+  </div>
+
+  <!-- ── HOW IT WORKS STEPS ── -->
+  <div class="how-section">
+    <div class="how-title">⚙️ How It Works</div>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="step-num">01</div>
+        <div class="step-icon">✍️</div>
+        <div class="step-label">Enter Movie + Review</div>
+        <div class="step-desc">User inputs movie name and writes their review</div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="how-step">
+        <div class="step-num">02</div>
+        <div class="step-icon">🔍</div>
+        <div class="step-label">System Processes Text</div>
+        <div class="step-desc">Checks positive & negative keywords in review</div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="how-step">
+        <div class="step-num">03</div>
+        <div class="step-icon">📊</div>
+        <div class="step-label">Sentiment Calculated</div>
+        <div class="step-desc">Positive / Negative / Neutral determined instantly</div>
+      </div>
+      <div class="step-arrow">→</div>
+      <div class="how-step">
+        <div class="step-num">04</div>
+        <div class="step-icon">🎯</div>
+        <div class="step-label">Result Generated</div>
+        <div class="step-desc">Rating out of 5 + WATCH / SKIP recommendation</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ADD REVIEW FORM ── -->
+  <div class="add-review-zone">
+    <div class="panel-title">✍️ Step 1 — Enter Movie Name & Write Your Review</div>
+    <div class="form-row">
+      <input id="formMovie" class="movie-input" placeholder="Movie name... (e.g. Stree, Inception, Pushpa)" />
+      <select id="formRating" class="rating-select">
+        <option value="1">⭐ 1</option>
+        <option value="2">⭐⭐ 2</option>
+        <option value="3" selected>⭐⭐⭐ 3</option>
+        <option value="4">⭐⭐⭐⭐ 4</option>
+        <option value="5">⭐⭐⭐⭐⭐ 5</option>
+      </select>
+    </div>
+    <textarea id="formReview" class="review-textarea"
+      placeholder="Apna review likho... (e.g. bahut achhi movie thi, acting amazing thi, boring nahi tha)"></textarea>
+    <div class="form-bottom">
+      <div id="sentimentPreview" class="sentiment-preview"></div>
+      <button class="add-btn" onclick="addReview()">+ ADD REVIEW</button>
+    </div>
+    <div id="addSuccess" class="add-success" style="display:none;"></div>
+    <div id="addError"   class="add-error"   style="display:none;"></div>
+  </div>
+
+  <!-- ── SEARCH / ANALYZE ── -->
+  <div class="search-zone">
+    <div class="panel-title">🔍 Step 2 — Analyze Any Movie</div>
+    <div class="search-row">
+      <input id="movieInput" class="movie-input"
+        placeholder="Enter movie name to analyze... (e.g. Stree, Badlapur)" />
+      <button class="analyze-btn" onclick="analyze()">ANALYZE</button>
+    </div>
+  </div>
+
+  <!-- LOADING + ERROR -->
+  <div id="loadingBar" class="loading-bar" style="display:none;"></div>
+  <div id="errorMsg"   class="error-msg"   style="display:none;"></div>
+
+  <!-- ── RESULTS ── -->
+  <div id="results" style="display:none;">
+
+    <!-- WHAT OUR SYSTEM TELLS YOU -->
+    <div class="output-label">
+      <span class="out-tag">👉 Is the movie good or bad?</span>
+      <span class="out-tag">👉 What rating it deserves?</span>
+      <span class="out-tag">👉 Should you WATCH or SKIP?</span>
+    </div>
+
+    <!-- MOVIE BANNER -->
+    <div class="movie-banner">
+      <div class="poster-icon" id="verdictEmoji">🎬</div>
+      <div class="movie-meta">
+        <h2 id="movieTitle">—</h2>
+        <div id="movieMeta" class="meta-row"></div>
+        <span class="verdict-badge" id="verdictBadge">—</span>
+        <p class="verdict-reason" id="verdictReason">—</p>
+        <div id="plotSection" style="display:none;">
+          <p id="moviePlot" class="plot-text"></p>
+        </div>
+        <div id="actorsSection" style="display:none;">
+          <p id="movieActors" class="actors-text"></p>
+        </div>
+        <div id="awardsSection" style="display:none;">
+          <p id="movieAwards" class="awards-text"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Our Rating</div>
+        <div class="stat-value gold" id="ratingVal">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Positive</div>
+        <div class="stat-value green" id="posVal">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Negative</div>
+        <div class="stat-value red" id="negVal">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Reviews</div>
+        <div class="stat-value blue" id="totalVal">—</div>
+      </div>
+      <div class="stat-card" id="imdbCard" style="display:none;">
+        <div class="stat-label">IMDb</div>
+        <div class="stat-value gold" id="imdbVal">—</div>
+      </div>
+      <div class="stat-card" id="rtCard" style="display:none;">
+        <div class="stat-label">Rotten T.</div>
+        <div class="stat-value green" id="rtVal">—</div>
+      </div>
+    </div>
+
+    <!-- SENTIMENT + CHART -->
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-title">📊 Sentiment Breakdown</div>
+        <div class="sentiment-bar-wrap">
+          <div class="sent-label"><span>Positive 😊</span><span id="pPct">0%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-pos" id="barPos" style="width:0%"></div></div>
+        </div>
+        <div class="sentiment-bar-wrap">
+          <div class="sent-label"><span>Negative 😞</span><span id="nPct">0%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-neg" id="barNeg" style="width:0%"></div></div>
+        </div>
+        <div class="sentiment-bar-wrap">
+          <div class="sent-label"><span>Neutral 😐</span><span id="nuPct">0%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-neu" id="barNeu" style="width:0%"></div></div>
+        </div>
+        <div class="mini-stats">
+          <div class="mini-stat">
+            <div class="stat-label">Love</div>
+            <div class="mini-val red" id="loveVal">—</div>
+          </div>
+          <div class="mini-stat">
+            <div class="stat-label">Hype</div>
+            <div class="mini-val blue" id="hypeVal">—</div>
+          </div>
+          <div class="mini-stat">
+            <div class="stat-label">Rewatch</div>
+            <div class="mini-val gold" id="rewatchVal">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">📈 Distribution Chart</div>
+        <canvas id="chart" style="max-height:220px;"></canvas>
+      </div>
+    </div>
+
+  </div>
+  <!-- END RESULTS -->
+
+  <!-- ── OVERVIEW / PROJECT SECTION ── -->
+  <div id="overviewSection" style="display:none;">
+
+    <div class="panel" style="margin-bottom:1.2rem;">
+      <div class="panel-title">💡 Project Overview</div>
+      <div class="overview-grid">
+        <div class="overview-card">
+          <div class="ov-icon">🎯</div>
+          <div class="ov-label">Objective</div>
+          <div class="ov-text">Analyze movie reviews to determine audience sentiment and opinion trends using NLP</div>
+        </div>
+        <div class="overview-card">
+          <div class="ov-icon">⚙️</div>
+          <div class="ov-label">Method</div>
+          <div class="ov-text">Keyword-based sentiment classification into Positive, Negative, and Neutral categories</div>
+        </div>
+        <div class="overview-card">
+          <div class="ov-icon">📊</div>
+          <div class="ov-label">Outcome</div>
+          <div class="ov-text">Instant verdict with rating, sentiment %, and WATCH / SKIP / MAYBE recommendation</div>
+        </div>
+        <div class="overview-card">
+          <div class="ov-icon">🌍</div>
+          <div class="ov-label">Real-World Use</div>
+          <div class="ov-text">OTT platforms, film distributors & critics use sentiment analysis to gauge public opinion</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:1.2rem;">
+      <div class="panel-title">📈 Opinion Trend Analysis</div>
+      <canvas id="trendChart" style="max-height:200px;"></canvas>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">🔄 Sentiment Analysis Pipeline</div>
+      <div class="pipeline">
+        <div class="pipe-step">
+          <div class="pipe-num">01</div>
+          <div class="pipe-label">Input</div>
+          <div class="pipe-desc">User enters movie name & review text</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="pipe-num">02</div>
+          <div class="pipe-label">Process</div>
+          <div class="pipe-desc">System checks positive & negative keywords</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="pipe-num">03</div>
+          <div class="pipe-label">Classify</div>
+          <div class="pipe-desc">Sentiment tagged: Positive / Negative / Neutral</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="pipe-num">04</div>
+          <div class="pipe-label">Output</div>
+          <div class="pipe-desc">Rating out of 5 + WATCH / SKIP recommendation</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- END OVERVIEW -->
+
+</div><!-- end #app -->
+<script src="script.js"></script>
+</body>
+</html>
