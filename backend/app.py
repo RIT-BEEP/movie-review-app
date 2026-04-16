@@ -2,12 +2,15 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import csv, os, requests
 from datetime import date
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
 REVIEWS_FILE = os.path.join(os.path.dirname(__file__), 'reviews.csv')
-OMDB_API_KEY =  '262ff25f' # <-- Step 1 ki key yahan
+OMDB_API_KEY = os.getenv('OMDB_API_KEY', '262ff25f')
 
 # ─── CSV helpers ────────────────────────────────────────────────
 
@@ -97,18 +100,14 @@ def analyze():
     data  = request.get_json()
     query = data.get('movie', '').strip().lower()
 
-    # 1. Local CSV reviews
     all_reviews = load_reviews()
     local = [r for r in all_reviews if r['movie'] == query]
 
-    # 2. OMDB real data
     omdb = fetch_omdb(query)
 
-    # If no local reviews AND no OMDB → error
     if not local and not omdb:
         return jsonify({'error': f'"{query}" ke liye koi data nahi mila'}), 404
 
-    # ── Local sentiment ──
     total = len(local)
     if total > 0:
         sentiments = [r['sentiment'].capitalize() for r in local]
@@ -127,7 +126,6 @@ def analyze():
         pos_pct = neg_pct = neu_pct = avg_rating = 0
         pos = neg = neu = 0
 
-    # ── OMDB data ──
     omdb_rating  = None
     imdb_rating  = None
     rt_rating    = None
@@ -151,18 +149,15 @@ def analyze():
         runtime   = omdb.get('Runtime')
         actors    = omdb.get('Actors')
 
-        # IMDb rating
         try:
             imdb_rating = float(omdb.get('imdbRating', 0))
         except:
             imdb_rating = None
 
-        # Rotten Tomatoes
         for src in omdb.get('Ratings', []):
             if src['Source'] == 'Rotten Tomatoes':
                 rt_rating = src['Value']
 
-        # OMDB based verdict
         if imdb_rating:
             if imdb_rating >= 7.5:
                 omdb_verdict = 'WATCH'
@@ -171,7 +166,6 @@ def analyze():
             else:
                 omdb_verdict = 'SKIP'
 
-    # ── Final verdict (local overrides if enough reviews) ──
     if total >= 3:
         if pos_pct >= 60:
             verdict = 'WATCH'
@@ -240,7 +234,13 @@ def movies():
 
 @app.route('/')
 def home():
-    return jsonify({'status': 'CineLyze running!', 'routes': ['/analyze', '/add_review', '/stats', '/movies']})
+    return jsonify({
+        'status': 'CineLyze running!',
+        'routes': ['/analyze', '/add_review', '/stats', '/movies']
+    })
+
+# ─── Run ────────────────────────────────────────────────────────
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+                 
