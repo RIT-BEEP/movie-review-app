@@ -10,7 +10,7 @@ app = Flask(__name__)
 CORS(app)
 
 REVIEWS_FILE = os.path.join(os.path.dirname(__file__), 'reviews.csv')
-OMDB_API_KEY = os.getenv('OMDB_API_KEY', '262ff25f')
+OMDB_API_KEY = os.getenv("OMDB_API_KEY")
 
 # ─── CSV helpers ────────────────────────────────────────────────
 
